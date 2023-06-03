@@ -78,18 +78,18 @@
       console.log('Arrays equal: ', arraysAreEqual(sortedArray, mergeArray));
     }
   }
+
+  function uuidv4() {
+    return (<any>[1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, c =>
+      (
+        c ^
+        (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))
+      ).toString(16)
+    );
+  }
 </script>
 
 <div class="array-container">
-  <div class="bar-wrapper">
-    {#each array as value, i (i)}
-      <div
-        class="array-bar"
-        style={`background-color: ${PRIMARY_COLOR}; height: ${value}px`}
-      />
-    {/each}
-  </div>
-
   <div class="button-wrapper">
     <button on:click={resetArray} type="button">Generate New Array</button>
     <button on:click={mergeSort} type="button">Merge Sort</button>
@@ -100,15 +100,24 @@
       Test Sorting Algorithms (BROKEN)
     </button>
   </div>
+
+  <div class="bar-wrapper">
+    {#each array as value (uuidv4())}
+      <div
+        class="array-bar"
+        style={`background-color: ${PRIMARY_COLOR}; height: ${value}px`}
+      />
+    {/each}
+  </div>
 </div>
 
 <style>
   .array-container {
-    position: absolute;
     display: flex;
     inset: 0;
     flex-direction: column;
     gap: 20px;
+    min-height: 100vh;
   }
 
   .array-bar {
