@@ -2,42 +2,41 @@ export function getMergeSort(array: number[]) {
   const animations: number[][] = [];
 
   const auxArray = array.slice();
-  mergeSortHelper(array, 0, array.length - 1, auxArray, animations);
+  mergeSort(array, 0, array.length - 1, auxArray, animations);
 
   return animations;
 }
 
-function mergeSortHelper(
+function mergeSort(
   mainArray: number[],
-  startIdx: number,
-  endIdx: number,
+  left: number,
+  right: number,
   auxArray: number[],
   animations: number[][]
 ) {
-  if (startIdx === endIdx) return;
-
-  const middleIdx = Math.floor((startIdx + endIdx) / 2);
-  mergeSortHelper(auxArray, startIdx, middleIdx, mainArray, animations);
-  mergeSortHelper(auxArray, middleIdx + 1, endIdx, mainArray, animations);
-  doMerge(mainArray, startIdx, middleIdx, endIdx, auxArray, animations);
+  if (left < right) {
+    const mid = Math.floor((left + right) / 2);
+    mergeSort(auxArray, left, mid, mainArray, animations);
+    mergeSort(auxArray, mid + 1, right, mainArray, animations);
+    doMerge(mainArray, left, mid, right, auxArray, animations);
+  }
 }
 
 function doMerge(
   mainArray: number[],
-  startIdx: number,
-  middleIdx: number,
-  endIdx: number,
+  left: number,
+  mid: number,
+  right: number,
   auxArray: number[],
   animations: number[][]
 ) {
-  let k = startIdx;
-  let i = middleIdx;
-  let j = endIdx;
+  let k = left;
+  let i = left;
+  let j = mid + 1;
 
-  while (i <= middleIdx && j <= endIdx) {
+  while (i <= mid && j <= right) {
     // these are the values we are comparing; push them once to change their color
     animations.push([i, j]);
-
     // push them a second time to revert their color
     animations.push([i, j]);
 
@@ -54,14 +53,14 @@ function doMerge(
     }
   }
 
-  while (i <= middleIdx) {
+  while (i <= mid) {
     animations.push([i, i]);
     animations.push([i, i]);
     animations.push([k, auxArray[i]]);
     mainArray[k++] = auxArray[i++];
   }
 
-  while (j <= endIdx) {
+  while (j <= right) {
     animations.push([j, j]);
     animations.push([j, j]);
     animations.push([k, auxArray[j]]);

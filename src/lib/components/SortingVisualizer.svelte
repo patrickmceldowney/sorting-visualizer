@@ -11,8 +11,9 @@
   function resetArray() {
     array = [];
     for (let i = 0; i < BARS; i++) {
-      array.push(randomIntFromInterval(5, 730));
+      array.push(randomIntFromInterval(5, 450));
     }
+    array = array;
   }
 
   function randomIntFromInterval(min: number, max: number) {
@@ -30,7 +31,7 @@
     return true;
   }
 
-  function mergeSort() {
+  function performMergeSort() {
     const animations = getMergeSort(array);
     for (let i = 0; i < animations.length; i++) {
       const arrayBars = Array.from(
@@ -41,27 +42,24 @@
       const isColorChange = i % 3 !== 2;
       if (isColorChange) {
         const [barOneIdx, barTwoIdx] = animations[i];
-        const barOneStyle = arrayBars[barOneIdx].style;
-        const barTwoStyle = arrayBars[barTwoIdx].style;
         const color = i % 3 === 0 ? SECONDARY_COLOR : PRIMARY_COLOR;
 
         setTimeout(() => {
-          barOneStyle.backgroundColor = color;
-          barTwoStyle.backgroundColor = color;
+          arrayBars[barOneIdx].style.backgroundColor = color;
+          arrayBars[barTwoIdx].style.backgroundColor = color;
         }, i * ANIMATION_SPEED);
       } else {
         setTimeout(() => {
           const [barOneIdx, newHeight] = animations[i];
-          const barOneStyle = arrayBars[barOneIdx].style;
-          barOneStyle.height = `${newHeight}px`;
+          arrayBars[barOneIdx].style.height = `${newHeight}px`;
         }, i * ANIMATION_SPEED);
       }
     }
   }
 
-  function quickSort() {}
-  function heapSort() {}
-  function bubbleSort() {}
+  function performQuickSort() {}
+  function performHeapSort() {}
+  function performBubbleSort() {}
 
   // NOTE: This method will only work if your sorting algorithms actually return
   // the sorted arrays; if they return the animations (as they currently do), then
@@ -74,7 +72,7 @@
         array.push(randomIntFromInterval(-1000, 1000));
       }
       const sortedArray = array.slice().sort((a, b) => a - b);
-      const mergeArray = getMergeSort(array.slice());
+      const mergeArray = mergeSort(array.slice());
       console.log('Arrays equal: ', arraysAreEqual(sortedArray, mergeArray));
     }
   }
@@ -92,10 +90,10 @@
 <div class="array-container">
   <div class="button-wrapper">
     <button on:click={resetArray} type="button">Generate New Array</button>
-    <button on:click={mergeSort} type="button">Merge Sort</button>
-    <button on:click={quickSort} type="button">Quick Sort</button>
-    <button on:click={heapSort} type="button">Heap Sort</button>
-    <button on:click={bubbleSort} type="button">Bubble Sort</button>
+    <button on:click={performMergeSort} type="button">Merge Sort</button>
+    <button on:click={performQuickSort} type="button">Quick Sort</button>
+    <button on:click={performHeapSort} type="button">Heap Sort</button>
+    <button on:click={performBubbleSort} type="button">Bubble Sort</button>
     <button on:click={testSortingAlgorithms} type="button">
       Test Sorting Algorithms (BROKEN)
     </button>
@@ -120,9 +118,15 @@
     min-height: 100vh;
   }
 
+  .bar-wrapper {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 1px;
+    width: 100%;
+  }
+
   .array-bar {
     width: 2px;
     display: inline-block;
-    margin: 0 1px;
   }
 </style>
