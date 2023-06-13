@@ -71,7 +71,7 @@ function doMerge(
 export function getQuickSort(array: number[]) {
   const animations: number[][] = [];
 
-  quickSort(array, 0, array.length, animations);
+  quickSort(array, 0, array.length - 1, animations);
   return animations;
 }
 function quickSort(
@@ -100,6 +100,7 @@ function partition(
   let j = start;
 
   while (j < pivot) {
+    console.log('j %d -- pivot %d', j, pivot);
     animations.push([j, pivot]);
     animations.push([j, pivot]);
     if (array[j] > array[pivot]) {
@@ -107,7 +108,7 @@ function partition(
     } else {
       // When the value at arr[j] is less than the pivot:
       // increment i (arr[i] will be a value greater than arr[pivot]) and swap the value at arr[i] and arr[j]
-      animations.push([j, array[i]]);
+      animations.push([i, array[j]]);
       i++;
       swap(array, i, j);
       j++;
@@ -117,7 +118,7 @@ function partition(
   //The value at arr[i + 1] will be greater than the value of arr[pivot]
   animations.push([i + 1, pivot]);
   animations.push([i + 1, pivot]);
-  animations.push([j, array[pivot]]);
+  animations.push([i + 1, array[pivot]]);
   swap(array, i + 1, pivot);
 
   //You return i + 1, as the values to the left of it are less than arr[i+1], and values to the right are greater than arr[i + 1]

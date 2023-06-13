@@ -2,14 +2,13 @@
   import { getMergeSort, getQuickSort } from '../tools/sortingAlgorithms';
 
   const ANIMATION_SPEED = 1;
-  const BARS = 310;
+  const BARS = 10;
+  // const BARS = 310;
   const PRIMARY_COLOR = '#FF715B';
   const SECONDARY_COLOR = '#2F52E0';
 
   let array: number[] = [];
   let startTime: number;
-  let endTime: number;
-  let sorting = false;
 
   function resetArray() {
     array = [];
@@ -42,7 +41,7 @@
   function performQuickSort() {
     const animations = getQuickSort(array);
     console.log('animations', array);
-    // performAnimations(animations);
+    performAnimations(animations);
   }
   function performHeapSort() {}
   function performBubbleSort() {}
@@ -96,18 +95,6 @@
         }, i * ANIMATION_SPEED);
       }
     }
-  }
-
-  function startTimer() {
-    sorting = true;
-    startTime = Date.now();
-    setInterval(() => {
-      let delta = Date.now() - startTime;
-    });
-  }
-
-  function endTimer() {
-    sorting = false;
   }
 </script>
 
