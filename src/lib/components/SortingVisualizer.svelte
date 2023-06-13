@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { getMergeSort } from '../tools/sortingAlgorithms';
+  import { getMergeSort, getQuickSort } from '../tools/sortingAlgorithms';
 
   const ANIMATION_SPEED = 1;
   const BARS = 310;
@@ -7,6 +7,9 @@
   const SECONDARY_COLOR = '#2F52E0';
 
   let array: number[] = [];
+  let startTime: number;
+  let endTime: number;
+  let sorting = false;
 
   function resetArray() {
     array = [];
@@ -33,12 +36,50 @@
 
   function performMergeSort() {
     const animations = getMergeSort(array);
+    performAnimations(animations);
+  }
+
+  function performQuickSort() {
+    const animations = getQuickSort(array);
+    console.log('animations', array);
+    // performAnimations(animations);
+  }
+  function performHeapSort() {}
+  function performBubbleSort() {}
+
+  // NOTE: This method will only work if your sorting algorithms actually return
+  // the sorted arrays; if they return the animations (as they currently do), then
+  // this method will be broken.
+  function testSortingAlgorithms() {
+    for (let i = 0; i < 100; i++) {
+      const array = [];
+      const length = randomIntFromInterval(1, 1000);
+      for (let j = 0; j < length; j++) {
+        array.push(randomIntFromInterval(-1000, 1000));
+      }
+      const sortedArray = array.slice().sort((a, b) => a - b);
+      const mergeArray = getMergeSort(array.slice());
+      console.log('Arrays equal: ', arraysAreEqual(sortedArray, mergeArray));
+    }
+  }
+
+  function uuidv4() {
+    return (<any>[1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, c =>
+      (
+        c ^
+        (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))
+      ).toString(16)
+    );
+  }
+
+  function performAnimations(animations: number[][]) {
     for (let i = 0; i < animations.length; i++) {
       const arrayBars = Array.from(
         document.getElementsByClassName(
           'array-bar'
         ) as HTMLCollectionOf<HTMLElement>
       );
+      // every third animation is a height change, other ones are color changes
       const isColorChange = i % 3 !== 2;
       if (isColorChange) {
         const [barOneIdx, barTwoIdx] = animations[i];
@@ -57,33 +98,16 @@
     }
   }
 
-  function performQuickSort() {}
-  function performHeapSort() {}
-  function performBubbleSort() {}
-
-  // NOTE: This method will only work if your sorting algorithms actually return
-  // the sorted arrays; if they return the animations (as they currently do), then
-  // this method will be broken.
-  function testSortingAlgorithms() {
-    for (let i = 0; i < 100; i++) {
-      const array = [];
-      const length = randomIntFromInterval(1, 1000);
-      for (let j = 0; j < length; j++) {
-        array.push(randomIntFromInterval(-1000, 1000));
-      }
-      const sortedArray = array.slice().sort((a, b) => a - b);
-      const mergeArray = mergeSort(array.slice());
-      console.log('Arrays equal: ', arraysAreEqual(sortedArray, mergeArray));
-    }
+  function startTimer() {
+    sorting = true;
+    startTime = Date.now();
+    setInterval(() => {
+      let delta = Date.now() - startTime;
+    });
   }
 
-  function uuidv4() {
-    return (<any>[1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, c =>
-      (
-        c ^
-        (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))
-      ).toString(16)
-    );
+  function endTimer() {
+    sorting = false;
   }
 </script>
 
@@ -94,9 +118,6 @@
     <button on:click={performQuickSort} type="button">Quick Sort</button>
     <button on:click={performHeapSort} type="button">Heap Sort</button>
     <button on:click={performBubbleSort} type="button">Bubble Sort</button>
-    <button on:click={testSortingAlgorithms} type="button">
-      Test Sorting Algorithms (BROKEN)
-    </button>
   </div>
 
   <div class="bar-wrapper">
