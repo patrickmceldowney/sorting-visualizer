@@ -1,103 +1,108 @@
 <script lang="ts">
-  import { getMergeSort, getQuickSort } from '../tools/sortingAlgorithms';
+  import { onMount } from 'svelte';
+  import {
+    bubbleSort,
+    getMergeSort,
+    getQuickSort,
+  } from '../tools/sortingAlgorithms';
+  import type { Move } from '../tools/types';
 
   const ANIMATION_SPEED = 1;
-  const BARS = 10;
-  // const BARS = 310;
   const PRIMARY_COLOR = '#FF715B';
   const SECONDARY_COLOR = '#2F52E0';
+  const BAR_WIDTH = 6;
 
   let array: number[] = [];
-  let startTime: number;
+  let windowWidth: number;
+  let container: HTMLElement;
+  let timer: number;
+
+  onMount(() => resetArray());
 
   function resetArray() {
+    if (timer) {
+      clearTimeout(timer);
+    }
     array = [];
-    for (let i = 0; i < BARS; i++) {
+    for (let i = 0; i < (windowWidth - 200) / BAR_WIDTH; i++) {
       array.push(randomIntFromInterval(5, 450));
     }
     array = array;
+    showBars();
   }
 
   function randomIntFromInterval(min: number, max: number) {
     return Math.floor(Math.random() * (max - min + 1) + min);
   }
 
-  function arraysAreEqual(array1: any[], array2: any[]) {
-    if (array1.length !== array2.length) return false;
-
-    for (let i = 0; i < array1.length; i++) {
-      if (array1[i] !== array2[i]) {
-        return false;
-      }
-    }
-    return true;
-  }
-
   function performMergeSort() {
-    const animations = getMergeSort(array);
-    performAnimations(animations);
+    console.time('mergeSort');
+    const moves = getMergeSort([...array]);
+    console.timeEnd('mergeSort');
+
+    animate(moves);
+    showBars();
   }
 
   function performQuickSort() {
-    const animations = getQuickSort(array);
-    console.log('animations', array);
-    performAnimations(animations);
+    console.time('quickSort');
+    const moves = getQuickSort([...array]);
+    console.timeEnd('quickSort');
+
+    animate(moves);
+    showBars();
   }
   function performHeapSort() {}
-  function performBubbleSort() {}
 
-  // NOTE: This method will only work if your sorting algorithms actually return
-  // the sorted arrays; if they return the animations (as they currently do), then
-  // this method will be broken.
-  function testSortingAlgorithms() {
-    for (let i = 0; i < 100; i++) {
-      const array = [];
-      const length = randomIntFromInterval(1, 1000);
-      for (let j = 0; j < length; j++) {
-        array.push(randomIntFromInterval(-1000, 1000));
-      }
-      const sortedArray = array.slice().sort((a, b) => a - b);
-      const mergeArray = getMergeSort(array.slice());
-      console.log('Arrays equal: ', arraysAreEqual(sortedArray, mergeArray));
+  function performBubbleSort() {
+    console.time('bubbleSort');
+    const moves = bubbleSort([...array]);
+    console.timeEnd('bubbleSort');
+
+    animate(moves);
+    showBars();
+  }
+
+  function animate(moves: Move[]) {
+    if (!moves.length) {
+      showBars();
+      return;
     }
+
+    const move = moves.shift();
+    const [i, j] = move.indices;
+
+    if (move.type === 'swap') {
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+
+    showBars(move);
+    timer = setTimeout(() => {
+      animate(moves);
+    }, ANIMATION_SPEED);
   }
 
-  function uuidv4() {
-    return (<any>[1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, c =>
-      (
-        c ^
-        (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))
-      ).toString(16)
-    );
-  }
+  function showBars(move: Move = undefined) {
+    container.innerHTML = '';
+    for (let i = 0; i < array.length; i++) {
+      const bar = document.createElement('div');
+      bar.style.height = `${array[i]}px`;
+      bar.style.width = `${BAR_WIDTH}px`;
+      bar.style.display = 'inline-block';
+      bar.style.backgroundColor = PRIMARY_COLOR;
+      bar.classList.add('array-bar');
+      bar.style.borderRadius = '0 0 2px 2px';
 
-  function performAnimations(animations: number[][]) {
-    for (let i = 0; i < animations.length; i++) {
-      const arrayBars = Array.from(
-        document.getElementsByClassName(
-          'array-bar'
-        ) as HTMLCollectionOf<HTMLElement>
-      );
-      // every third animation is a height change, other ones are color changes
-      const isColorChange = i % 3 !== 2;
-      if (isColorChange) {
-        const [barOneIdx, barTwoIdx] = animations[i];
-        const color = i % 3 === 0 ? SECONDARY_COLOR : PRIMARY_COLOR;
-
-        setTimeout(() => {
-          arrayBars[barOneIdx].style.backgroundColor = color;
-          arrayBars[barTwoIdx].style.backgroundColor = color;
-        }, i * ANIMATION_SPEED);
-      } else {
-        setTimeout(() => {
-          const [barOneIdx, newHeight] = animations[i];
-          arrayBars[barOneIdx].style.height = `${newHeight}px`;
-        }, i * ANIMATION_SPEED);
+      if (move && move.indices.includes(i)) {
+        bar.style.backgroundColor =
+          move.type === 'swap' ? SECONDARY_COLOR : PRIMARY_COLOR;
       }
+      container.appendChild(bar);
     }
   }
 </script>
 
+<svelte:window bind:innerWidth={windowWidth} />
 <div class="array-container">
   <div class="button-wrapper">
     <button on:click={resetArray} type="button">Generate New Array</button>
@@ -107,13 +112,13 @@
     <button on:click={performBubbleSort} type="button">Bubble Sort</button>
   </div>
 
-  <div class="bar-wrapper">
-    {#each array as value (uuidv4())}
+  <div class="bar-wrapper" bind:this={container}>
+    <!-- {#each array as value (uuidv4())}
       <div
         class="array-bar"
         style={`background-color: ${PRIMARY_COLOR}; height: ${value}px`}
       />
-    {/each}
+    {/each} -->
   </div>
 </div>
 
@@ -129,12 +134,8 @@
   .bar-wrapper {
     display: flex;
     flex-wrap: nowrap;
-    gap: 1px;
+    /* gap: 1px; */
     width: 100%;
-  }
-
-  .array-bar {
-    width: 2px;
-    display: inline-block;
+    height: 100%;
   }
 </style>

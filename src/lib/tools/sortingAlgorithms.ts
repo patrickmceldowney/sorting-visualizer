@@ -1,10 +1,12 @@
+import type { Move } from './types';
+
 export function getMergeSort(array: number[]) {
-  const animations: number[][] = [];
+  const moves: Move[] = [];
 
   const auxArray = array.slice();
-  mergeSort(array, 0, array.length - 1, auxArray, animations);
+  mergeSort(array, 0, array.length - 1, auxArray, moves);
 
-  return animations;
+  return moves;
 }
 
 function mergeSort(
@@ -12,13 +14,13 @@ function mergeSort(
   left: number,
   right: number,
   auxArray: number[],
-  animations: number[][]
+  moves: Move[]
 ) {
   if (left < right) {
     const mid = Math.floor((left + right) / 2);
-    mergeSort(auxArray, left, mid, mainArray, animations);
-    mergeSort(auxArray, mid + 1, right, mainArray, animations);
-    doMerge(mainArray, left, mid, right, auxArray, animations);
+    mergeSort(auxArray, left, mid, mainArray, moves);
+    mergeSort(auxArray, mid + 1, right, mainArray, moves);
+    doMerge(mainArray, left, mid, right, auxArray, moves);
   }
 }
 
@@ -28,106 +30,108 @@ function doMerge(
   mid: number,
   right: number,
   auxArray: number[],
-  animations: number[][]
+  moves: Move[]
 ) {
   let k = left;
   let i = left;
   let j = mid + 1;
 
   while (i <= mid && j <= right) {
-    // these are the values we are comparing; push them once to change their color
-    animations.push([i, j]);
-    // push them a second time to revert their color
-    animations.push([i, j]);
+    moves.push({ indices: [i, j], type: 'comp' });
 
     if (auxArray[i] <= auxArray[j]) {
-      // we overwrite the value at index k in the original array with
-      // the value at index i in the auxArray
-      animations.push([k, auxArray[i]]);
+      moves.push({ indices: [k, i], type: 'swap' });
       mainArray[k++] = auxArray[i++];
     } else {
-      // We overwrite the value at index k in the original array with the
-      // value at index j in the auxArray
-      animations.push([k, auxArray[j]]);
+      moves.push({ indices: [k, j], type: 'swap' });
       mainArray[k++] = auxArray[j++];
     }
   }
 
   while (i <= mid) {
-    animations.push([i, i]);
-    animations.push([i, i]);
-    animations.push([k, auxArray[i]]);
+    moves.push({ indices: [i, i], type: 'comp' });
+    moves.push({ indices: [k, i], type: 'swap' });
     mainArray[k++] = auxArray[i++];
   }
 
   while (j <= right) {
-    animations.push([j, j]);
-    animations.push([j, j]);
-    animations.push([k, auxArray[j]]);
+    moves.push({ indices: [j, j], type: 'comp' });
+    moves.push({ indices: [j, j], type: 'comp' });
+    moves.push({ indices: [k, j], type: 'swap' });
     mainArray[k++] = auxArray[j++];
   }
 }
 
 export function getQuickSort(array: number[]) {
-  const animations: number[][] = [];
+  const moves: Move[] = [];
 
-  quickSort(array, 0, array.length - 1, animations);
-  return animations;
+  quickSort(array, 0, array.length - 1, moves);
+  return moves;
 }
 function quickSort(
   mainArray: number[],
   start: number,
   end: number,
-  animations: number[][]
+  moves: Move[]
 ) {
   if (start < end) {
-    let pivot = partition(mainArray, start, end, animations);
+    let pivot = randPartition(mainArray, start, end, moves);
 
-    quickSort(mainArray, start, pivot - 1, animations);
-    quickSort(mainArray, pivot + 1, end, animations);
+    quickSort(mainArray, start, pivot - 1, moves);
+    quickSort(mainArray, pivot + 1, end, moves);
   }
 }
 
-function partition(
-  array: number[],
-  start: number,
-  end: number,
-  animations: number[][]
-) {
-  let pivot = end;
+function partition(array: number[], start: number, end: number, moves: Move[]) {
+  let pivot = start;
   // Set i to start - 1 so that it can access the first index in the event that the value at arr[0] is greater than arr[pivot]
-  let i = start - 1;
-  let j = start;
+  let i = start + 1;
 
-  while (j < pivot) {
-    console.log('j %d -- pivot %d', j, pivot);
-    animations.push([j, pivot]);
-    animations.push([j, pivot]);
-    if (array[j] > array[pivot]) {
-      j++;
-    } else {
-      // When the value at arr[j] is less than the pivot:
-      // increment i (arr[i] will be a value greater than arr[pivot]) and swap the value at arr[i] and arr[j]
-      animations.push([i, array[j]]);
+  for (let j = start + 1; j <= end; j++) {
+    moves.push({ indices: [j, pivot], type: 'comp' });
+    if (array[j] <= array[pivot]) {
+      moves.push({ indices: [i, j], type: 'swap' });
+      [array[i], array[j]] = [array[j], array[i]];
       i++;
-      swap(array, i, j);
-      j++;
     }
   }
 
-  //The value at arr[i + 1] will be greater than the value of arr[pivot]
-  animations.push([i + 1, pivot]);
-  animations.push([i + 1, pivot]);
-  animations.push([i + 1, array[pivot]]);
-  swap(array, i + 1, pivot);
-
-  //You return i + 1, as the values to the left of it are less than arr[i+1], and values to the right are greater than arr[i + 1]
-  // As such, when the recursive quicksorts are called, the new sub arrays will not include this the previously used pivot value
-  return i + 1;
+  moves.push({ indices: [pivot, i - 1], type: 'comp' });
+  moves.push({ indices: [pivot, i - 1], type: 'swap' });
+  [array[pivot], array[i - 1]] = [array[i - 1], array[pivot]];
+  pivot = i - 1;
+  return pivot;
 }
 
-function swap(array: number[], firstIndex: number, secondIndex: number) {
-  let tmp = array[firstIndex];
-  array[firstIndex] = array[secondIndex];
-  array[secondIndex] = tmp;
+function randPartition(
+  array: number[],
+  start: number,
+  end: number,
+  moves: Move[]
+) {
+  let pivot = Math.floor(Math.random() * (end - start + 1)) + start;
+  // swap start and pivot element in array
+
+  moves.push({ indices: [start, pivot], type: 'swap' });
+  [array[start], array[pivot]] = [array[pivot], array[start]];
+  return partition(array, start, end, moves);
+}
+
+export function bubbleSort(array: number[]) {
+  const moves: Move[] = [];
+  let swapped = false;
+  do {
+    swapped = false;
+    for (let i = 0; i < array.length - 1; i++) {
+      // comparison animation
+      moves.push({ indices: [i, i + 1], type: 'comp' });
+
+      if (array[i] > array[i + 1]) {
+        swapped = true;
+        moves.push({ indices: [i, i + 1], type: 'swap' });
+        [array[i], array[i + 1]] = [array[i + 1], array[i]];
+      }
+    }
+  } while (swapped);
+  return moves;
 }
