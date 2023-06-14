@@ -16,12 +16,22 @@
   let windowWidth: number;
   let container: HTMLElement;
   let timer: number;
+  let audioCtx: AudioContext;
+  let sorting = false;
 
   onMount(() => resetArray());
+
+  function cancel() {
+    if (timer) {
+      clearTimeout(timer);
+      sorting = false;
+    }
+  }
 
   function resetArray() {
     if (timer) {
       clearTimeout(timer);
+      sorting = false;
     }
     array = [];
     for (let i = 0; i < (windowWidth - 200) / BAR_WIDTH; i++) {
@@ -69,6 +79,8 @@
       return;
     }
 
+    sorting = true;
+
     const move = moves.shift();
     const [i, j] = move.indices;
 
@@ -76,10 +88,11 @@
       [array[i], array[j]] = [array[j], array[i]];
     }
 
+    // TODO: linear interpolation sounds
     showBars(move);
     timer = setTimeout(() => {
       animate(moves);
-    }, ANIMATION_SPEED);
+    }, 10);
   }
 
   function showBars(move: Move = undefined) {
@@ -100,26 +113,47 @@
       container.appendChild(bar);
     }
   }
+
+  function playNote(freq: number) {
+    if (!audioCtx) audioCtx = new AudioContext();
+
+    const dur = 0.1;
+    const oscillator = audioCtx.createOscillator();
+    oscillator.frequency.value = freq;
+    oscillator.start();
+    oscillator.stop(audioCtx.currentTime + dur);
+
+    const node = audioCtx.createGain();
+    node.gain.value = 0.1;
+    node.gain.linearRampToValueAtTime(0, audioCtx.currentTime + dur);
+
+    oscillator.connect(node);
+    node.connect(audioCtx.destination);
+  }
 </script>
 
 <svelte:window bind:innerWidth={windowWidth} />
 <div class="array-container">
   <div class="button-wrapper">
-    <button on:click={resetArray} type="button">Generate New Array</button>
-    <button on:click={performMergeSort} type="button">Merge Sort</button>
-    <button on:click={performQuickSort} type="button">Quick Sort</button>
-    <button on:click={performHeapSort} type="button">Heap Sort</button>
-    <button on:click={performBubbleSort} type="button">Bubble Sort</button>
+    <button on:click={resetArray} disabled={sorting} type="button"
+      >Generate New Array</button
+    >
+    <button on:click={performMergeSort} disabled={sorting} type="button"
+      >Merge Sort</button
+    >
+    <button on:click={performQuickSort} disabled={sorting} type="button"
+      >Quick Sort</button
+    >
+    <button on:click={performHeapSort} disabled={sorting} type="button"
+      >Heap Sort</button
+    >
+    <button on:click={performBubbleSort} disabled={sorting} type="button"
+      >Bubble Sort</button
+    >
+    <button on:click={cancel} type="button">Cancel</button>
   </div>
 
-  <div class="bar-wrapper" bind:this={container}>
-    <!-- {#each array as value (uuidv4())}
-      <div
-        class="array-bar"
-        style={`background-color: ${PRIMARY_COLOR}; height: ${value}px`}
-      />
-    {/each} -->
-  </div>
+  <div class="bar-wrapper" bind:this={container} />
 </div>
 
 <style>
@@ -134,7 +168,7 @@
   .bar-wrapper {
     display: flex;
     flex-wrap: nowrap;
-    /* gap: 1px; */
+    gap: 1px;
     width: 100%;
     height: 100%;
   }

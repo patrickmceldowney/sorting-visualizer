@@ -88,7 +88,7 @@ function partition(array: number[], start: number, end: number, moves: Move[]) {
   let i = start + 1;
 
   for (let j = start + 1; j <= end; j++) {
-    moves.push({ indices: [j, pivot], type: 'comp' });
+    // moves.push({ indices: [j, pivot], type: 'comp' });
     if (array[j] <= array[pivot]) {
       moves.push({ indices: [i, j], type: 'swap' });
       [array[i], array[j]] = [array[j], array[i]];
@@ -96,7 +96,7 @@ function partition(array: number[], start: number, end: number, moves: Move[]) {
     }
   }
 
-  moves.push({ indices: [pivot, i - 1], type: 'comp' });
+  // moves.push({ indices: [pivot, i - 1], type: 'comp' });
   moves.push({ indices: [pivot, i - 1], type: 'swap' });
   [array[pivot], array[i - 1]] = [array[i - 1], array[pivot]];
   pivot = i - 1;
@@ -124,7 +124,7 @@ export function bubbleSort(array: number[]) {
     swapped = false;
     for (let i = 0; i < array.length - 1; i++) {
       // comparison animation
-      moves.push({ indices: [i, i + 1], type: 'comp' });
+      // moves.push({ indices: [i, i + 1], type: 'comp' });
 
       if (array[i] > array[i + 1]) {
         swapped = true;
@@ -135,3 +135,5 @@ export function bubbleSort(array: number[]) {
   } while (swapped);
   return moves;
 }
+
+export function heapSort(array: number[]) {}
