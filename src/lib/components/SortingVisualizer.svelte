@@ -89,6 +89,7 @@
     }
 
     // TODO: linear interpolation sounds
+    playNote(array[i] * 20);
     showBars(move);
     timer = setTimeout(() => {
       animate(moves);
