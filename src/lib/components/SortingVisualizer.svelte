@@ -7,7 +7,7 @@
   } from '../tools/sortingAlgorithms';
   import type { Move } from '../tools/types';
 
-  const ANIMATION_SPEED = 1;
+  const ANIMATION_SPEED = 10;
   const PRIMARY_COLOR = '#FF715B';
   const SECONDARY_COLOR = '#2F52E0';
   const BAR_WIDTH = 6;
@@ -88,12 +88,10 @@
       [array[i], array[j]] = [array[j], array[i]];
     }
 
-    // TODO: linear interpolation sounds
-    playNote(array[i] * 20);
     showBars(move);
     timer = setTimeout(() => {
       animate(moves);
-    }, 10);
+    }, ANIMATION_SPEED);
   }
 
   function showBars(move: Move = undefined) {
@@ -114,23 +112,6 @@
       container.appendChild(bar);
     }
   }
-
-  function playNote(freq: number) {
-    if (!audioCtx) audioCtx = new AudioContext();
-
-    const dur = 0.1;
-    const oscillator = audioCtx.createOscillator();
-    oscillator.frequency.value = freq;
-    oscillator.start();
-    oscillator.stop(audioCtx.currentTime + dur);
-
-    const node = audioCtx.createGain();
-    node.gain.value = 0.1;
-    node.gain.linearRampToValueAtTime(0, audioCtx.currentTime + dur);
-
-    oscillator.connect(node);
-    node.connect(audioCtx.destination);
-  }
 </script>
 
 <svelte:window bind:innerWidth={windowWidth} />
@@ -145,9 +126,9 @@
     <button on:click={performQuickSort} disabled={sorting} type="button"
       >Quick Sort</button
     >
-    <button on:click={performHeapSort} disabled={sorting} type="button"
+    <!-- <button on:click={performHeapSort} disabled={sorting} type="button"
       >Heap Sort</button
-    >
+    > -->
     <button on:click={performBubbleSort} disabled={sorting} type="button"
       >Bubble Sort</button
     >
