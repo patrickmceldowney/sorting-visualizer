@@ -49,6 +49,7 @@
     console.time('mergeSort');
     const moves = getMergeSort([...array]);
     console.timeEnd('mergeSort');
+    console.log(array);
 
     animate(moves);
     showBars();

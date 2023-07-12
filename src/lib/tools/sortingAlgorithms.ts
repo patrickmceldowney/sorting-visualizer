@@ -2,63 +2,72 @@ import type { Move } from './types';
 
 export function getMergeSort(array: number[]) {
   const moves: Move[] = [];
-
-  const auxArray = array.slice();
-  mergeSort(array, 0, array.length - 1, auxArray, moves);
+  mergeSort(array, 0, array.length - 1, moves);
 
   return moves;
 }
 
 function mergeSort(
-  mainArray: number[],
+  array: number[],
   left: number,
   right: number,
-  auxArray: number[],
   moves: Move[]
 ) {
   if (left < right) {
     const mid = Math.floor((left + right) / 2);
-    mergeSort(auxArray, left, mid, mainArray, moves);
-    mergeSort(auxArray, mid + 1, right, mainArray, moves);
-    doMerge(mainArray, left, mid, right, auxArray, moves);
+    mergeSort(array, left, mid, moves);
+    mergeSort(array, mid + 1, right, moves);
+    doMerge(array, left, mid, right, moves);
   }
 }
 
 function doMerge(
-  mainArray: number[],
+  array: number[],
   left: number,
   mid: number,
   right: number,
-  auxArray: number[],
   moves: Move[]
 ) {
+  let n1 = mid - left + 1;
+  let n2 = right - mid;
+
+  // Create temp arrays
+  let L = array.splice(0, mid);
+  let R = array.splice(mid);
+
+  let i = 0;
+  let j = 0;
   let k = left;
-  let i = left;
-  let j = mid + 1;
 
-  while (i <= mid && j <= right) {
-    moves.push({ indices: [i, j], type: 'comp' });
+  while (i < n1 && j < n2) {
+    // moves.push({ indices: [i, j], type: 'comp' });
 
-    if (auxArray[i] <= auxArray[j]) {
+    if (L[i] <= R[j]) {
       moves.push({ indices: [k, i], type: 'swap' });
-      mainArray[k++] = auxArray[i++];
+      array[k] = L[i];
+      i++;
     } else {
       moves.push({ indices: [k, j], type: 'swap' });
-      mainArray[k++] = auxArray[j++];
+      array[k] = R[j];
+      j++;
     }
+    k++;
   }
 
-  while (i <= mid) {
-    moves.push({ indices: [i, i], type: 'comp' });
+  while (i < n1) {
+    // moves.push({ indices: [i, i], type: 'comp' });
     moves.push({ indices: [k, i], type: 'swap' });
-    mainArray[k++] = auxArray[i++];
+    array[k] = L[i];
+    k++;
+    i++;
   }
 
-  while (j <= right) {
-    moves.push({ indices: [j, j], type: 'comp' });
-    moves.push({ indices: [j, j], type: 'comp' });
+  while (j < n2) {
+    // moves.push({ indices: [j, j], type: 'comp' });
     moves.push({ indices: [k, j], type: 'swap' });
-    mainArray[k++] = auxArray[j++];
+    array[k] = R[j];
+    k++;
+    j++;
   }
 }
 
