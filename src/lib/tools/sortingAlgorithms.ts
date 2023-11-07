@@ -2,7 +2,8 @@ import type { Move } from './types';
 
 export function getMergeSort(array: number[]) {
   const moves: Move[] = [];
-  mergeSort(array, 0, array.length - 1, moves);
+  const tempArray = Array.from(array); // Create a copy to avoid modifying the original array
+  mergeSort(tempArray, 0, tempArray.length - 1, moves);
 
   return moves;
 }
@@ -32,40 +33,44 @@ function doMerge(
   let n2 = right - mid;
 
   // Create temp arrays
-  let L = array.splice(0, mid);
-  let R = array.splice(mid);
+  const L = new Array(n1);
+  const R = new Array(n2);
+
+  for (let i = 0; i < n1; i++) {
+    L[i] = array[left + i];
+  }
+
+  for (let j = 0; j < n2; j++) {
+    R[j] = array[mid + 1 + j];
+  }
 
   let i = 0;
   let j = 0;
   let k = left;
 
   while (i < n1 && j < n2) {
-    // moves.push({ indices: [i, j], type: 'comp' });
-
     if (L[i] <= R[j]) {
-      moves.push({ indices: [k, i], type: 'swap' });
       array[k] = L[i];
+      moves.push({ indices: [k, left + i], type: 'swap' });
       i++;
     } else {
-      moves.push({ indices: [k, j], type: 'swap' });
       array[k] = R[j];
+      moves.push({ indices: [k, mid + 1 + j], type: 'swap' });
       j++;
     }
     k++;
   }
 
   while (i < n1) {
-    // moves.push({ indices: [i, i], type: 'comp' });
-    moves.push({ indices: [k, i], type: 'swap' });
     array[k] = L[i];
+    moves.push({ indices: [k, left + i], type: 'swap' });
     k++;
     i++;
   }
 
   while (j < n2) {
-    // moves.push({ indices: [j, j], type: 'comp' });
-    moves.push({ indices: [k, j], type: 'swap' });
     array[k] = R[j];
+    moves.push({ indices: [k, mid + 1 + j], type: 'swap' });
     k++;
     j++;
   }
@@ -73,8 +78,9 @@ function doMerge(
 
 export function getQuickSort(array: number[]) {
   const moves: Move[] = [];
+  const tempArray = Array.from(array);
 
-  quickSort(array, 0, array.length - 1, moves);
+  quickSort(tempArray, 0, tempArray.length - 1, moves);
   return moves;
 }
 function quickSort(
@@ -128,17 +134,19 @@ function randPartition(
 
 export function bubbleSort(array: number[]) {
   const moves: Move[] = [];
+  const tempArray = Array.from(array);
+
   let swapped = false;
   do {
     swapped = false;
-    for (let i = 0; i < array.length - 1; i++) {
+    for (let i = 0; i < tempArray.length - 1; i++) {
       // comparison animation
       // moves.push({ indices: [i, i + 1], type: 'comp' });
 
-      if (array[i] > array[i + 1]) {
+      if (tempArray[i] > tempArray[i + 1]) {
         swapped = true;
         moves.push({ indices: [i, i + 1], type: 'swap' });
-        [array[i], array[i + 1]] = [array[i + 1], array[i]];
+        [tempArray[i], tempArray[i + 1]] = [tempArray[i + 1], tempArray[i]];
       }
     }
   } while (swapped);

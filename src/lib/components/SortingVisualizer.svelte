@@ -28,6 +28,9 @@
     }
   }
 
+  /**
+   * Reset bars
+   */
   function resetArray() {
     if (timer) {
       clearTimeout(timer);
@@ -41,42 +44,41 @@
     showBars();
   }
 
+  /**
+   * Get a random unsorted interval
+   * @param min
+   * @param max
+   */
   function randomIntFromInterval(min: number, max: number) {
     return Math.floor(Math.random() * (max - min + 1) + min);
   }
 
-  function performMergeSort() {
-    console.time('mergeSort');
-    const moves = getMergeSort([...array]);
-    console.timeEnd('mergeSort');
-    console.log(array);
-
+  async function performSort(sort: 'quick' | 'merge' | 'bubble' | 'heap') {
+    let moves: Move[] = [];
+    switch (sort) {
+      case 'quick':
+        moves = getQuickSort(array);
+        break;
+      case 'merge':
+        moves = getMergeSort(array);
+        break;
+      case 'bubble':
+        moves = bubbleSort(array);
+        break;
+      default:
+        break;
+    }
     animate(moves);
-    showBars();
   }
 
-  function performQuickSort() {
-    console.time('quickSort');
-    const moves = getQuickSort([...array]);
-    console.timeEnd('quickSort');
-
-    animate(moves);
-    showBars();
-  }
-  function performHeapSort() {}
-
-  function performBubbleSort() {
-    console.time('bubbleSort');
-    const moves = bubbleSort([...array]);
-    console.timeEnd('bubbleSort');
-
-    animate(moves);
-    showBars();
-  }
-
-  function animate(moves: Move[]) {
+  /**
+   * Animate bars
+   * @param moves
+   */
+  async function animate(moves: Move[]) {
     if (!moves.length) {
       showBars();
+      sorting = false;
       return;
     }
 
@@ -95,6 +97,10 @@
     }, ANIMATION_SPEED);
   }
 
+  /**
+   * Render bars on screen
+   * @param move
+   */
   function showBars(move: Move = undefined) {
     container.innerHTML = '';
     for (let i = 0; i < array.length; i++) {
@@ -118,21 +124,33 @@
 <svelte:window bind:innerWidth={windowWidth} />
 <div class="array-container">
   <div class="button-wrapper">
-    <button on:click={resetArray} disabled={sorting} type="button"
-      >Generate New Array</button
+    <button on:click={resetArray} disabled={sorting} type="button">
+      Generate New Array
+    </button>
+    <button
+      on:click={() => performSort('merge')}
+      disabled={sorting}
+      type="button"
     >
-    <button on:click={performMergeSort} disabled={sorting} type="button"
-      >Merge Sort</button
+      Merge Sort
+    </button>
+    <button
+      on:click={() => performSort('quick')}
+      disabled={sorting}
+      type="button"
     >
-    <button on:click={performQuickSort} disabled={sorting} type="button"
-      >Quick Sort</button
-    >
-    <!-- <button on:click={performHeapSort} disabled={sorting} type="button"
+      Quick Sort
+    </button>
+    <!-- <button on:click={() => performSort('heap')} disabled={sorting} type="button"
       >Heap Sort</button
     > -->
-    <button on:click={performBubbleSort} disabled={sorting} type="button"
-      >Bubble Sort</button
+    <button
+      on:click={() => performSort('bubble')}
+      disabled={sorting}
+      type="button"
     >
+      Bubble Sort
+    </button>
     <button on:click={cancel} type="button">Cancel</button>
   </div>
 
@@ -154,5 +172,12 @@
     gap: 1px;
     width: 100%;
     height: 100%;
+  }
+
+  .button-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
   }
 </style>
