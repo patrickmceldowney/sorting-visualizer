@@ -127,13 +127,13 @@
     <button on:click={resetArray} disabled={sorting} type="button">
       Generate New Array
     </button>
-    <button
+    <!-- <button
       on:click={() => performSort('merge')}
       disabled={sorting}
       type="button"
     >
       Merge Sort
-    </button>
+    </button> -->
     <button
       on:click={() => performSort('quick')}
       disabled={sorting}
